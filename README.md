@@ -2,6 +2,15 @@
 
 Provides recipes to trigger AWS instance registration with (or deregistration from) one or more Elastic Load Balancers. These can be attached to, for example, the Configure/Shutdown lifecycle events in OpsWorks.
 
+**NOTE**: At the time of writing, the `awscli` cookbook dependency on the supermarket is [broken](https://github.com/awslabs/awscli-cookbook/issues/2). Your top-level Berksfile (the one OpsWorks refers to directly) will need to explicitly specify an alternative source *ABOVE this cookbook*, like so:
+```
+source "https://supermarket.chef.io"
+
+cookbook "awscli", github: "awslabs/awscli-cookbook"
+cookbook "aws-elb-registration", github: "antiuniverse/aws-elb-registration-cookbook"
+(...)
+```
+
 ## Supported Platforms
 
 TODO: List your supported platforms.
@@ -38,7 +47,7 @@ The special "\_all" key specifies ELBs that ALL instances should register with, 
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": ...,
+      "Sid": "(...)",
       "Effect": "Allow",
       "Action": [
         "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
