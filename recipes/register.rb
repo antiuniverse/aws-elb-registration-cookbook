@@ -9,16 +9,17 @@
 
 include_recipe 'awscli'
 
+
 my_instance_id = node[:opsworks][:instance][:aws_instance_id]
 my_hostname = node[:opsworks][:instance][:hostname]
 
-elb_maps = data_bag_item("aws-elb-registration", "hostnames_to_balancers_map")
+elb_maps = data_bag_item( "aws-elb-registration", "hostnames_to_balancers_map" )
 
 Chef::Log.info( "aws-elb-registration::register - #{elb_maps.to_json}" )
 
 elb_names = []
-elb_names += elb_maps["_all"].split(/,\s*/) if elb_maps.has_key?("_all")
-elb_names += elb_maps[my_hostname].split(/,\s*/) if elb_maps.has_key?(my_hostname)
+elb_names += elb_maps["_all"].split( /,\s*/ ) if elb_maps.has_key?( "_all" )
+elb_names += elb_maps[my_hostname].split( /,\s*/ ) if elb_maps.has_key?( my_hostname )
 elb_names.uniq!
 
 Chef::Log.info( "aws-elb-registration::register - Registering #{my_hostname} with #{elb_names}" )
