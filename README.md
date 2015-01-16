@@ -1,6 +1,6 @@
 # aws-elb-registration-cookbook
 
-Provides recipes to trigger AWS instance registration with (or deregistration from) one or more Elastic Load Balancers. These can be attached to, for example, the Configure/Shutdown lifecycle events in OpsWorks.
+Provides recipes to trigger AWS instance registration with (or deregistration from) one or more Elastic Load Balancers. These can be attached to, for example, the Setup/Shutdown lifecycle events in OpsWorks.
 
 ## Supported Platforms
 
@@ -8,9 +8,13 @@ Tested on Amazon Linux and Ubuntu 14.04; probably works elsewhere, let me know.
 
 ## Usage
 
-Configured via `[:aws-elb-registration][:hostnames_to_balancers_map]`: A hash of key/value string pairs, where each key corresponds to an OpsWorks hostname, and the value specifies a comma-separated list of names of Elastic Load Balancers with which that instance should be registered.
+### Data Bag Configuration
 
-The special "\_all" key specifies ELBs that ALL instances should register with, regardless of hostname. When used in conjunction with hostname-specific entries, the result for a given host is the union of all "\_all" ELBs AND all ELBs specific to that host.
+`[:aws-elb-registration][:hostname_mappings]`: A hash of key/value string pairs, where each key corresponds to an OpsWorks hostname, and the value specifies a comma-separated list of names of Elastic Load Balancers with which that instance should be registered.
+
+`[:aws-elb-registration][:layer_mappings]`: Like `hostname_mappings`, except the keys correspond to OpsWorks layer names rather than hostnames.
+
+The special "\_all" key specifies ELBs that ALL instances should register with, and for the sake of convenience is supported in both the hostname and layer mapping directives. The result for a given instance is the union of: 1) all "\_all" ELBs, and 2) all ELBs mapped by matching hostname/layer rules.
 
 ### Example:
 
@@ -19,11 +23,15 @@ The special "\_all" key specifies ELBs that ALL instances should register with, 
   "opsworks": {
     "data_bags": {
       "aws-elb-registration": {
-        "hostnames_to_balancers_map": {
+        "hostname_mappings": {
           "_all": "entire-stack-elb",
           "aphrodite": "greek-elb, names-starting-with-a-elb",
           "apollo": "greek-elb, names-starting-with-a-elb",
           "dionysus": "greek-elb"
+        },
+        "layer_mappings": {
+          "_all": "also-entire-stack-elb",
+          "rails": "api_elb, web_elb"
         }
       }
     }
@@ -31,7 +39,7 @@ The special "\_all" key specifies ELBs that ALL instances should register with, 
 }
 ```
 
-**NOTE**: By default, the AWS CLI will assume the IAM role `aws-opsworks-ec2-role`, and by default, that role does not have the permissions required to perform ELB (de)registration. A minimal policy that would allow the required operations is as follows:
+**NOTE**: The AWS CLI will assume the instance IAM role, which by default is `aws-opsworks-ec2-role`, and by default, that role does not have the permissions required to perform ELB (de)registration. A minimal policy that would allow the required operations is as follows:
 
 ```json
 {
