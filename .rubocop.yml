@@ -1,0 +1,17 @@
+Metrics/LineLength:
+  Max: 100
+
+Style/EmptyLines:
+  Enabled: false
+
+Style/RedundantReturn:
+  Enabled: false
+
+Style/SpaceInsideParens:
+  Enabled: false
+
+
+# Per-file overrides
+Style/SingleSpaceBeforeFirstArg:
+  Exclude:
+    - metadata.rb
