@@ -34,7 +34,7 @@ mapped_elbs.each do | elb_name |
 end
 
 mapped_elbsv2.each do | target_group_arn |
-  execute "deregister_from_#{elb_name}" do
+  execute "deregister_from_#{target_group_arn}" do
     # http://docs.aws.amazon.com/cli/latest/reference/elbv2/deregister-targets.html
 
     cmd = node['awscli']['binary'].dup
