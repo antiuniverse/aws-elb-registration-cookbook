@@ -1,28 +1,39 @@
 module AwsElbRegistration
   # TODO: Rethink configuration schema and support chef search?
   BAG_NAME = 'aws-elb-registration'
+  ALB_BAG_NAME = "aws-elbv2-registration"
   BAG_ITEM_MAPPING_HOSTNAMES = 'hostname_mappings'
   BAG_ITEM_MAPPING_LAYERS = 'layer_mappings'
   WILDCARD_KEY = '_all'
 
 
   module Helpers
-    # Return array of ELB names mapped to ++hostname++ and/or ++layers++.
-    def get_mapped_elbs( hostname = nil, layers = nil )
+    def get_mapped_resources( bag_name, hostname, layers )
       hostname ||= node[:opsworks][:instance][:hostname]
       layers ||= node[:opsworks][:instance][:layers]
 
-      mapped_elbs = parse_matching_rules(
+      mapped_resources = parse_matching_rules(
         hostname,
-        data_bag_safe_item( BAG_NAME, BAG_ITEM_MAPPING_HOSTNAMES )
+        data_bag_safe_item( bag_name, BAG_ITEM_MAPPING_HOSTNAMES )
       )
 
-      mapped_elbs += parse_matching_rules(
+      mapped_resources += parse_matching_rules(
         layers,
-        data_bag_safe_item( BAG_NAME, BAG_ITEM_MAPPING_LAYERS )
+        data_bag_safe_item( bag_name, BAG_ITEM_MAPPING_LAYERS )
       )
 
-      return mapped_elbs.uniq
+      return mapped_resources.uniq
+    end
+
+
+    # Return array of ELB names mapped to ++hostname++ and/or ++layers++.
+    def get_mapped_elbs( hostname = nil, layers = nil )
+      get_mapped_resources( BAG_NAME, hostname, layers )
+    end
+
+    # Return array of ELBv2 names mapped to ++hostname++ and/or ++layers++.
+    def get_mapped_elbsv2( hostname = nil, layers = nil )
+      get_mapped_resources( ALB_BAG_NAME, hostname, layers )
     end
 
     # Non-existent items return an empty hash instead of raising an exception.
